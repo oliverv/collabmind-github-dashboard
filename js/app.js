@@ -490,4 +490,4 @@ init().catch(error => {
       <p>Unable to load repository data. Please try again later.</p>
     </div>
   `;
-});// Netlify deploy lock - Mon Sep 28 15:06:20 CEST 2026
+});
