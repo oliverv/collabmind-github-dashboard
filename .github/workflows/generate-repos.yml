@@ -1,0 +1,118 @@
+name: Generate repos.json
+
+on:
+  schedule:
+    # Run daily at 00:00 UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    # Allow manual trigger
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Need to push changes
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Fetch all repositories
+        id: fetch-repos
+        run: |
+          # Use GitHub App token to have higher rate limits (1000 req/hr)
+          # Falls back to GITHUB_TOKEN for 60 req/hr
+          echo 'Fetching repositories from GitHub API...'
+          
+          # Install node-fetch if not available
+          npm install node-fetch@2
+          
+          # Create a script to fetch all repos
+          cat > fetch-repos.js << 'EOF'
+          const fetch = require('node-fetch');
+          const fs = require('fs');
+          
+          const USERNAME = 'oliverv';
+          const TOKEN = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+          
+          async function getRepos() {
+            const repos = [];
+            let page = 1;
+            
+            const headers = {
+              'Accept': 'application/vnd.github.v3+json',
+              'User-Agent': 'collabmind-github-dashboard'
+            };
+            
+            if (TOKEN) {
+              headers['Authorization'] = `token ${TOKEN}`;
+            }
+            
+            while (true) {
+              const url = `https://api.github.com/users/${USERNAME}/repos?per_page=100&page=${page}&sort=updated`;
+              const res = await fetch(url, { headers });
+              
+              if (!res.ok) {
+                throw new Error(`GitHub API error: ${res.status} ${res.statusText}`);
+              }
+              
+              const batch = await res.json();
+              if (batch.length === 0) break;
+              repos.push(...batch);
+              page++;
+            }
+            
+            return repos;
+          }
+          
+          (async () => {
+            try {
+              console.log('Fetching repositories...');
+              const repos = await getRepos();
+              console.log(`Found ${repos.length} repositories`);
+              
+              // Add metadata
+              const output = {
+                generated: new Date().toISOString(),
+                count: repos.length,
+                username: USERNAME,
+                repos: repos
+              };
+              
+              fs.writeFileSync('repos.json', JSON.stringify(output, null, 2));
+              console.log('repos.json written successfully');
+              process.exit(0);
+            } catch (error) {
+              console.error('Error:', error.message);
+              process.exit(1);
+            }
+          })();
+          EOF
+          
+          node fetch-repos.js
+
+      - name: Commit and push repos.json
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          # Check if repos.json changed
+          if ! git diff --quiet repos.json; then
+            git add repos.json
+            git commit -m "Update repos.json - $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git push
+          else
+            echo "repos.json has not changed"
+          fi
+
+      - name: Cleanup
+        if: always()
+        run: |
+          rm -f fetch-repos.js

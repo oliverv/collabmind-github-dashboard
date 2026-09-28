@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Collabmind Apps • GitHub Live Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="header">
+    <h1>COLLABMIND APPS</h1>
+    <span class="live-badge">GitHub LIVE ●</span>
+  </header>
+
+  <section class="stats">
+    <span id="repo-count">Loading...</span> repositories
+  </section>
+
+  <section class="search-section">
+    <input type="text" id="search" placeholder="Search repositories">
+  </section>
+
+  <nav class="filters" id="filters">
+    <button class="filter-btn active" data-filter="all">ALL</button>
+    <button class="filter-btn" data-filter="app">APPS</button>
+    <button class="filter-btn" data-filter="ai">AI</button>
+    <button class="filter-btn" data-filter="mcp">MCP</button>
+    <button class="filter-btn" data-filter="tools">TOOLS</button>
+    <button class="filter-btn" data-filter="fork">FORKS</button>
+    <button class="filter-btn" data-filter="original">ORIGINAL</button>
+  </nav>
+
+  <main id="repos" class="repos-container">
+    Loading repositories...
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
