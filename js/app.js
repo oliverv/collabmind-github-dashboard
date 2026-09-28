@@ -15,7 +15,11 @@ function getRepoCategory(repo) {
   const name = repo.name.toLowerCase();
   const fullName = repo.full_name ? repo.full_name.toLowerCase() : name;
   const patterns = {
-    'app': ['collabmind-apps-', 'oliverv/collabmind-apps-', 'collabmind-1panel', '1panel', 'auto-space', 'copilot'],
+    'app': [
+      'collabmind-apps-', 'oliverv/collabmind-apps-', 'collabmind-1panel', '1panel', 
+      'auto-space', 'copilot', 'collabmind-tools-', 'oliverv/collabmind-tools-',
+      'collabmind-plugins-', 'oliverv/collabmind-plugins-'
+    ],
     'ai': ['collabmind-ai-', 'oliverv/collabmind-ai-', 'open-webui', 'ollama', 'lm-studio', 'text-generation-webui', 'oobabooga', 'anybolt', 'openwebui'],
     'mcp': ['collabmind-mcp-', 'oliverv/collabmind-mcp-', 'mcp-server', 'model-context-protocol'],
     'worker': ['collabmind-workers-', 'oliverv/collabmind-workers-', 'worker-', 'agent-'],
@@ -27,6 +31,11 @@ function getRepoCategory(repo) {
     if (keywords.some(kw => name.includes(kw) || fullName.includes(kw))) {
       return category;
     }
+  }
+  
+  // Check for repos with collabmind- prefix that aren't in specific categories
+  if (name.startsWith('collabmind-') || fullName.startsWith('oliverv/collabmind-')) {
+    return 'app';
   }
 
   // Check for forks
