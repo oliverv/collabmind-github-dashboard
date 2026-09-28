@@ -3,37 +3,76 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Collabmind Apps • GitHub Live Dashboard</title>
-  <link rel="stylesheet" href="style.css">
+  <title>CollabMind Repository Fabric</title>
+  <link rel="stylesheet" href="css/collabmind.css">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 </head>
 <body>
-  <header class="header">
-    <h1>COLLABMIND APPS</h1>
-    <span class="live-badge">GitHub LIVE ●</span>
-  </header>
+  <div class="fabric">
+    <!-- Header -->
+    <header class="fabric-header">
+      <div class="fabric-title">
+        <svg class="logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 2L28 10L28 22L16 30L4 22L4 10Z" stroke="#00D4FF" stroke-width="2"/>
+          <path d="M16 6L24 12L24 20L16 26L8 20L8 12Z" fill="#00D4FF"/>
+          <circle cx="16" cy="14" r="2" fill="#000000"/>
+        </svg>
+        <span class="title-text">COLLABMIND</span>
+      </div>
+      <div class="fabric-status">
+        <span class="status-indicator"></span>
+        <span class="status-text">FABRIC ONLINE ●</span>
+      </div>
+    </header>
 
-  <section class="stats">
-    <span id="repo-count">Loading...</span> repositories
-  </section>
+    <!-- One Human line -->
+    <div class="fabric-motto">
+      ONE HUMAN · MANY MODELS · ALL CONNECTED
+    </div>
 
-  <section class="search-section">
-    <input type="text" id="search" placeholder="Search repositories">
-  </section>
+    <!-- Repository stats -->
+    <section class="fabric-stats">
+      <div class="stat-item">
+        <span class="stat-label">REPOSITORY FABRIC</span>
+        <span class="stat-count" id="repo-count">0 REPOS</span>
+      </div>
+    </section>
 
-  <nav class="filters" id="filters">
-    <button class="filter-btn active" data-filter="all">ALL</button>
-    <button class="filter-btn" data-filter="app">APPS</button>
-    <button class="filter-btn" data-filter="ai">AI</button>
-    <button class="filter-btn" data-filter="mcp">MCP</button>
-    <button class="filter-btn" data-filter="tools">TOOLS</button>
-    <button class="filter-btn" data-filter="fork">FORKS</button>
-    <button class="filter-btn" data-filter="original">ORIGINAL</button>
-  </nav>
+    <!-- Search -->
+    <section class="search-section">
+      <div class="search-container">
+        <span class="search-icon">⌕</span>
+        <input type="text" id="search" placeholder="Search repository, language, upstream..." autocomplete="off">
+      </div>
+    </section>
 
-  <main id="repos" class="repos-container">
-    Loading repositories...
-  </main>
+    <!-- Filters and sort -->
+    <nav class="fabric-nav">
+      <div class="category-filters" id="category-filters">
+        <button class="filter-btn active" data-filter="all">ALL</button>
+      </div>
+      <div class="view-controls">
+        <span class="view-label">VIEW:</span>
+        <button class="view-btn active" data-view="grid">▦ GRID</button>
+        <button class="view-btn" data-view="list">≡ LIST</button>
+      </div>
+      <div class="sort-controls">
+        <span class="sort-label">SORT:</span>
+        <button class="sort-btn active" data-sort="updated">UPDATED ↓</button>
+        <button class="sort-btn" data-sort="name">NAME ↑</button>
+        <button class="sort-btn" data-sort="stargazers">STARS ↓</button>
+      </div>
+    </nav>
 
-  <script src="app.js"></script>
+    <!-- Main repo grid -->
+    <main id="repos" class="repos-grid">
+      <div class="loading-placeholder">
+        <div class="loading-spinner"></div>
+        <div>Loading fabric...</div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/app.js"></script>
 </body>
 </html>

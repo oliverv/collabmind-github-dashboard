@@ -86,8 +86,8 @@ jobs:
                 repos: repos
               };
               
-              fs.writeFileSync('repos.json', JSON.stringify(output, null, 2));
-              console.log('repos.json written successfully');
+              fs.writeFileSync('data/repos.json', JSON.stringify(output, null, 2));
+              console.log('data/repos.json written successfully');
               process.exit(0);
             } catch (error) {
               console.error('Error:', error.message);
@@ -102,14 +102,14 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
-          
-          # Check if repos.json changed
-          if ! git diff --quiet repos.json; then
-            git add repos.json
+
+          # Check if data/repos.json changed
+          if ! git diff --quiet data/repos.json; then
+            git add data/repos.json
             git commit -m "Update repos.json - $(date -u +%Y-%m-%dT%H:%M:%SZ)"
             git push
           else
-            echo "repos.json has not changed"
+            echo "data/repos.json has not changed"
           fi
 
       - name: Cleanup

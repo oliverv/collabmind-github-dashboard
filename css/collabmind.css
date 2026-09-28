@@ -1,0 +1,468 @@
+/* CollabMind Repository Fabric - Visual Identity */
+:root {
+  --fabric-black: #000000;
+  --fabric-cyan: #00D4FF;
+  --fabric-deep-blue-1: #000428;
+  --fabric-deep-blue-2: #004E92;
+  --fabric-gray-100: #0A0F1A;
+  --fabric-gray-200: #151A2A;
+  --fabric-gray-300: #1E2640;
+  --fabric-gray-400: #2A3355;
+  --fabric-gray-500: #4A5578;
+  --fabric-gray-600: #7A829E;
+  --fabric-accent: #00D4FF;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background: linear-gradient(135deg, var(--fabric-deep-blue-1) 0%, var(--fabric-black) 100%);
+  color: var(--fabric-gray-600);
+  min-height: 100vh;
+  overflow-x: hidden;
+  line-height: 1.5;
+}
+
+.fabric {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* Header */
+.fabric-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0 8px;
+  border-bottom: 1px solid var(--fabric-gray-300);
+  margin-bottom: 8px;
+}
+
+.fabric-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.title-text {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--fabric-gray-100);
+  letter-spacing: 0.5px;
+}
+
+.fabric-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #00FF00;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.status-text {
+  font-size: 0.85rem;
+  color: var(--fabric-gray-500);
+  font-variant-numeric: oldstyle-nums;
+}
+
+/* Motto */
+.fabric-motto {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.85rem;
+  color: var(--fabric-gray-500);
+  text-align: center;
+  padding: 8px 0 16px;
+  font-variant-numeric: oldstyle-nums;
+}
+
+/* Stats */
+.fabric-stats {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--fabric-gray-300);
+  margin-bottom: 16px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stat-label {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.9rem;
+  color: var(--fabric-gray-500);
+}
+
+.stat-count {
+  font-family: 'Jetbrains Mono', 'Fira Code', monospace;
+  font-size: 0.9rem;
+  color: var(--fabric-cyan);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Search */
+.search-section {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--fabric-gray-300);
+  margin-bottom: 16px;
+}
+
+.search-container {
+  position: relative;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  color: var(--fabric-gray-500);
+  pointer-events: none;
+}
+
+#search {
+  width: 100%;
+  padding: 10px 12px 10px 36px;
+  background: var(--fabric-gray-100);
+  border: 1px solid var(--fabric-gray-300);
+  border-radius: 6px;
+  color: var(--fabric-gray-100);
+  font-size: 0.9rem;
+  font-family: 'Jetbrains Mono', 'Fira Code', monospace;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#search:focus {
+  border-color: var(--fabric-cyan);
+  box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2);
+}
+
+#search::placeholder {
+  color: var(--fabric-gray-500);
+}
+
+/* Navigation */
+.fabric-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0 16px;
+  border-bottom: 1px solid var(--fabric-gray-300);
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.category-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-btn, .view-btn, .sort-btn {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--fabric-gray-300);
+  background: var(--fabric-gray-100);
+  color: var(--fabric-gray-600);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-btn.active, .view-btn.active, .sort-btn.active {
+  background: var(--fabric-cyan);
+  color: var(--fabric-black);
+  border-color: var(--fabric-cyan);
+}
+
+.filter-btn:hover:not(.active), .view-btn:hover:not(.active), .sort-btn:hover:not(.active) {
+  background: var(--fabric-gray-200);
+  color: var(--fabric-gray-100);
+}
+
+.view-controls, .sort-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.view-label, .sort-label {
+  font-size: 0.75rem;
+  color: var(--fabric-gray-500);
+  font-variant-numeric: oldstyle-nums;
+}
+
+/* Repositories Grid */
+.repos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+/* Repo Card */
+.repo-card {
+  background: var(--fabric-gray-100);
+  border: 1px solid var(--fabric-gray-300);
+  border-radius: 8px;
+  padding: 16px;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.repo-card:hover {
+  border-color: var(--fabric-cyan);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.repo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.repo-title {
+  font-family: 'Jetbrains Mono', 'Fira Code', monospace;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--fabric-cyan);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.repo-header a {
+  color: var(--fabric-cyan);
+  text-decoration: none;
+}
+
+.repo-header a:hover {
+  text-decoration: underline;
+}
+
+.repo-tags {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.tag {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+  font-variant-numeric: oldstyle-nums;
+}
+
+.tag.app { background: rgba(0, 212, 255, 0.15); color: #00D4FF; }
+.tag.ai { background: rgba(138, 43, 226, 0.15); color: #8A2BE2; }
+.tag.mcp { background: rgba(60, 179, 113, 0.15); color: #3CB371; }
+.tag.worker { background: rgba(255, 140, 0, 0.15); color: #FF8C00; }
+.tag.control { background: rgba(138, 43, 226, 0.15); color: #8A2BE2; }
+.tag.infra { background: rgba(0, 191, 255, 0.15); color: #00BF7F; }
+.tag.other { background: rgba(166, 166, 166, 0.15); color: #A6A6A6; }
+
+.tag.fork { 
+  background: rgba(255, 215, 0, 0.15); 
+  color: #FFD700;
+  font-size: 0.65rem;
+}
+
+.repo-name {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--fabric-gray-100);
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+
+.repo-name a {
+  color: var(--fabric-gray-100);
+  text-decoration: none;
+}
+
+.repo-name a:hover {
+  color: var(--fabric-cyan);
+}
+
+.repo-description {
+  font-size: 0.8rem;
+  color: var(--fabric-gray-500);
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.repo-stats {
+  display: flex;
+  gap: 16px;
+  font-size: 0.75rem;
+  color: var(--fabric-gray-500);
+  font-family: 'Jetbrains Mono', 'Fira Code', monospace;
+  margin-bottom: 12px;
+  font-variant-numeric: oldstyle-nums;
+}
+
+.repo-stats span {
+  white-space: nowrap;
+}
+
+/* Actions */
+.repo-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.action-btn {
+  font-size: 0.7rem;
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--fabric-gray-300);
+  background: var(--fabric-gray-200);
+  color: var(--fabric-gray-600);
+  text-decoration: none;
+  cursor: pointer;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  transition: all 0.2s;
+}
+
+.action-btn:hover {
+  background: var(--fabric-gray-300);
+  color: var(--fabric-cyan);
+  border-color: var(--fabric-cyan);
+}
+
+.action-btn.source {
+  color: var(--fabric-cyan);
+}
+
+.action-btn.source:hover {
+  background: var(--fabric-cyan);
+  color: var(--fabric-black);
+}
+
+.action-btn.clone {
+  font-size: 0.65rem;
+  padding: 4px 8px;
+}
+
+/* Loading state */
+.loading-placeholder {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--fabric-gray-500);
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--fabric-gray-300);
+  border-top-color: var(--fabric-cyan);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 12px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--fabric-gray-500);
+}
+
+.empty-state h3 {
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+  color: var(--fabric-gray-100);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .fabric {
+    padding: 16px;
+  }
+
+  .fabric-header {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .title-text {
+    font-size: 1.25rem;
+  }
+
+  .repo-card {
+    padding: 12px;
+  }
+
+  .fabric-nav {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .category-filters {
+    justify-content: center;
+  }
+
+  .view-controls, .sort-controls {
+    justify-content: center;
+  }
+
+  .repos-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .stat-count {
+    font-size: 0.8rem;
+  }
+
+  .view-btn, .sort-btn {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+  }
+}
