@@ -76,8 +76,17 @@ Repositories are automatically categorized by name patterns:
 | `collabmind-workers-*` | WORKER |
 | `collabmind-control-*` | CONTROL |
 | `collabmind-infra-*` | INFRA |
+| `collabmind-tools-*` | TOOLS |
+| `collabminds-*` | TOOLS |
 | Forks | FORK |
 | Everything else | OTHER |
+
+## Visualizations
+
+The dashboard includes three interactive charts:
+- **Language Distribution**: Doughnut chart showing programming languages used
+- **Category Breakdown**: Bar chart showing repo counts by category
+- **Star Distribution**: Bar chart showing repos by star count ranges
 
 ## Development
 
@@ -129,11 +138,13 @@ Since we fetch repos in pages of 100, even 1000+ repositories fit within a singl
 ## Visual Design
 
 Uses CollabMind's signature visual identity:
-- Near-black background: `#000000`
-- Deep blue gradient: `#000428` → `#004E92`
-- Accent cyan: `#00D4FF`
-- Monospace for technical information
-- Clean sans-serif for navigation
+- Background: Pure black `#000000`
+- Card background: Dark slate `#0A1220`
+- Text primary: Light gray `#E6EDF3` (high contrast)
+- Text secondary: Medium gray `#8B949E`
+- Accent cyan: `#00D4FF` for links, buttons, and highlights
+- Clean sans-serif (Inter) for all text
+- Monospace styling for tech specs (repo names, stats)
 
 ## License
 
