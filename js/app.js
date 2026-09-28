@@ -17,14 +17,14 @@ function getRepoCategory(repo) {
   const patterns = {
     'app': [
       'collabmind-apps-', 'oliverv/collabmind-apps-', 'collabmind-1panel', '1panel', 
-      'auto-space', 'copilot', 'collabmind-tools-', 'oliverv/collabmind-tools-',
-      'collabmind-plugins-', 'oliverv/collabmind-plugins-'
+      'auto-space', 'copilot'
     ],
     'ai': ['collabmind-ai-', 'oliverv/collabmind-ai-', 'open-webui', 'ollama', 'lm-studio', 'text-generation-webui', 'oobabooga', 'anybolt', 'openwebui'],
     'mcp': ['collabmind-mcp-', 'oliverv/collabmind-mcp-', 'mcp-server', 'model-context-protocol'],
     'worker': ['collabmind-workers-', 'oliverv/collabmind-workers-', 'worker-', 'agent-'],
     'control': ['collabmind-control-', 'oliverv/collabmind-control-', 'control-plane', 'orchestrator'],
-    'infra': ['collabmind-infra-', 'oliverv/collabmind-infra-', 'kubernetes', 'docker-', 'terraform', 'ansible', 'k3s', 'collabmind-kubernetes']
+    'infra': ['collabmind-infra-', 'oliverv/collabmind-infra-', 'kubernetes', 'docker-', 'terraform', 'ansible', 'k3s', 'collabmind-kubernetes'],
+    'tools': ['collabmind-tools-', 'oliverv/collabmind-tools-', 'collabminds-', 'tools-', 'cli-', 'cmd-']
   };
 
   for (const [category, keywords] of Object.entries(patterns)) {

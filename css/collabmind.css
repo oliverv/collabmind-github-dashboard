@@ -304,8 +304,9 @@ body {
   background: rgba(255, 215, 0, 0.15); 
   color: #FFD700;
   font-size: 0.65rem;
-}
+ }
 .tag.other { background: rgba(166, 166, 166, 0.15); color: #A6A6A6; }
+.tag.tools { background: rgba(255, 165, 0, 0.15); color: #FFA500; }
 .tag.tools { background: rgba(255, 165, 0, 0.15); color: #FFA500; }
 
 .repo-description {
