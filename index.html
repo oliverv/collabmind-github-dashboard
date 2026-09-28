@@ -6,6 +6,8 @@
   <title>CollabMind Repository Fabric</title>
   <link rel="stylesheet" href="css/collabmind.css">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <!-- Chart.js for visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
   <div class="fabric">
@@ -38,6 +40,24 @@
       </div>
     </section>
 
+    <!-- Visualizations Section -->
+    <section class="visualizations-section">
+      <div class="viz-container">
+        <div class="viz-card">
+          <h3 class="viz-title">Language Distribution</h3>
+          <canvas id="language-chart" width="300" height="200"></canvas>
+        </div>
+        <div class="viz-card">
+          <h3 class="viz-title">Category Breakdown</h3>
+          <canvas id="category-chart" width="300" height="200"></canvas>
+        </div>
+        <div class="viz-card">
+          <h3 class="viz-title">Star Distribution</h3>
+          <canvas id="star-chart" width="300" height="200"></canvas>
+        </div>
+      </div>
+    </section>
+
     <!-- Search -->
     <section class="search-section">
       <div class="search-container">
@@ -54,6 +74,7 @@
       <div class="view-controls">
         <span class="view-label">VIEW:</span>
         <button class="view-btn active" data-view="grid">▦ GRID</button>
+        <button class="view-btn" data-view="graph">GRAPH</button>
         <button class="view-btn" data-view="list">≡ LIST</button>
       </div>
       <div class="sort-controls">

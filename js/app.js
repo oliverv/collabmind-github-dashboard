@@ -8,6 +8,19 @@ let filteredRepos = [];
 let currentFilter = 'all';
 let currentSort = 'updated';
 let currentView = 'grid';
+let charts = {};
+
+// Color palette for categories
+const categoryColors = {
+  'app': '#00D4FF',
+  'ai': '#8A2BE2',
+  'mcp': '#3CB371',
+  'worker': '#FF8C00',
+  'control': '#8A2BE2',
+  'infra': '#00BF7F',
+  'fork': '#FFD700',
+  'other': '#A6A6A6'
+};
 
 // Category detection based on repository naming patterns
 function getRepoCategory(repo) {
@@ -200,6 +213,166 @@ function updateFilterButtons(repos) {
   container.innerHTML = html;
 }
 
+// Get language distribution
+function getLanguageDistribution(repos) {
+  const langs = {};
+  repos.forEach(repo => {
+    const lang = repo.language || 'Other';
+    langs[lang] = (langs[lang] || 0) + 1;
+  });
+  return langs;
+}
+
+// Get star distribution
+function getStarDistribution(repos) {
+  const distribution = { '<10': 0, '10-100': 0, '100-1000': 0, '1000+': 0 };
+  repos.forEach(repo => {
+    const stars = repo.stargazers_count;
+    if (stars < 10) distribution['<10']++;
+    else if (stars < 100) distribution['10-100']++;
+    else if (stars < 1000) distribution['100-1000']++;
+    else distribution['1000+']++;
+  });
+  return distribution;
+}
+
+// Create visualizations
+function createCharts(repos) {
+  const vizContainer = document.querySelector('.visualization-toggle');
+  if (!vizContainer) return;
+  
+  // Create visualization toggle
+  vizContainer.innerHTML = `
+    <button class="viz-btn active" data-viz="charts">CHARTS</button>
+    <button class="viz-btn" data-viz="graph">NETWORK</button>
+  `;
+  
+  // Render charts
+  renderCharts(repos);
+  
+  // Setup viz toggle
+  document.querySelector('.visualization-toggle').addEventListener('click', (e) => {
+    if (e.target.classList.contains('viz-btn')) {
+      document.querySelectorAll('.viz-btn').forEach(btn => btn.classList.remove('active'));
+      e.target.classList.add('active');
+      const viz = e.target.dataset.viz;
+      
+      document.querySelectorAll('.viz-container, .repos-graph').forEach(el => el.classList.add('hidden'));
+      if (viz === 'charts') {
+        document.querySelector('.viz-container').classList.remove('hidden');
+      } else {
+        document.querySelector('.repos-graph').classList.remove('hidden');
+      }
+    }
+  });
+}
+
+// Render chart visualization
+function renderCharts(repos) {
+  // Language Distribution (Doughnut)
+  const langData = getLanguageDistribution(repos);
+  const langCtx = document.getElementById('language-chart').getContext('2d');
+  
+  if (charts.language) charts.language.destroy();
+  charts.language = new Chart(langCtx, {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(langData),
+      datasets: [{
+        data: Object.values(langData),
+        backgroundColor: Object.keys(langData).map(l => {
+          if (['Go', 'TypeScript', 'Shell', 'Python', 'JavaScript', 'Rust', 'JSON', 'YAML', 'Dockerfile'].includes(l)) {
+            return categoryColors.app;
+          } else if (['Python', 'JavaScript', 'TypeScript'].includes(l)) {
+            return categoryColors.ai;
+          } else if (l === 'Other' || !l) {
+            return categoryColors.other;
+          }
+          return '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+        }),
+        borderColor: '#151A2A',
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom' },
+        title: { display: false }
+      }
+    }
+  });
+  
+  // Category Distribution (Bar)
+  const categoryCounts = {};
+  ['app', 'ai', 'mcp', 'worker', 'control', 'infra', 'fork', 'other'].forEach(cat => {
+    categoryCounts[cat.toUpperCase()] = repos.filter(r => getRepoCategory(r) === cat).length;
+  });
+  
+  const catCtx = document.getElementById('category-chart').getContext('2d');
+  
+  if (charts.category) charts.category.destroy();
+  charts.category = new Chart(catCtx, {
+    type: 'bar',
+    data: {
+      labels: Object.keys(categoryCounts),
+      datasets: [{
+        label: 'Count',
+        data: Object.values(categoryCounts),
+        backgroundColor: Object.keys(categoryCounts).map(cat => categoryColors[cat.toLowerCase()] || categoryColors.other),
+        borderColor: '#151A2A',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: { 
+          beginAtZero: true,
+          ticks: { color: '#7A829E' },
+          grid: { color: '#1E2640' }
+        },
+        x: { 
+          ticks: { color: '#7A829E' },
+          grid: { display: false }
+        }
+      },
+      plugins: {
+        legend: { display: false }
+      }
+    }
+  });
+  
+  // Star Distribution (Bar)
+  const starData = getStarDistribution(repos);
+  const starCtx = document.getElementById('star-chart').getContext('2d');
+  
+  if (charts.stars) charts.stars.destroy();
+  charts.stars = new Chart(starCtx, {
+    type: 'bar',
+    data: {
+      labels: ['<10', '10-100', '100-1k', '1k+'],
+      datasets: [{
+        label: 'Repos',
+        data: Object.values(starData),
+        backgroundColor: '#00D4FF',
+        borderColor: '#151A2A',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: { beginAtZero: true }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+}
+
 // Apply filters and sorting
 function applyFiltersAndSort() {
   let result = [...allRepos];
@@ -242,6 +415,51 @@ function applyFiltersAndSort() {
   renderRepos(result);
 }
 
+// Render graph view - simplified network visualization
+function renderGraph(repos) {
+  const container = document.getElementById('repos');
+  
+  // Find forks with parents
+  const forks = repos.filter(r => r.fork && r.parent).map(r => ({
+    fork: r,
+    parent: r.parent
+  }));
+  
+  if (!forks.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <h3>No Fork Relationships</h3>
+        <p>No forked repositories with upstream parents found in this collection.</p>
+      </div>
+    `;
+    return;
+  }
+  
+  // Simple grid layout for fork relationships
+  container.innerHTML = `
+    <div class="repos-grid">
+      ${forks.map(f => `
+        <article class="repo-card">
+          <div class="repo-header">
+            <h3 class="repo-name">
+              <a href="${f.fork.html_url}" target="_blank" rel="noopener">${f.fork.name}</a>
+            </h3>
+            <span class="tag fork">FORK</span>
+          </div>
+          <div class="repo-upstream">
+            <span class="upstream-label">↳ </span>
+            <a href="${f.parent.html_url}" target="_blank" rel="noopener">${f.parent.full_name}</a>
+          </div>
+          <div class="repo-stats">
+            <span>⭐ ${f.fork.stargazers_count}</span>
+            <span>Updated ${formatDate(f.fork.updated_at)}</span>
+          </div>
+        </article>
+      `).join('')}
+    </div>
+  `;
+}
+
 // Initialize the application
 async function init() {
   // Load repos
@@ -252,8 +470,15 @@ async function init() {
   updateStats(repos);
   updateFilterButtons(repos);
   
-  // Render initially
-  applyFiltersAndSort();
+  // Create charts
+  createCharts(repos);
+  
+  // Render initially (based on default view)
+  if (currentView === 'graph') {
+    renderGraph(repos);
+  } else {
+    applyFiltersAndSort();
+  }
   
   // Setup event listeners
   setupEventListeners();
@@ -264,6 +489,13 @@ function setupEventListeners() {
   // Search input
   const searchInput = document.getElementById('search');
   searchInput.addEventListener('input', () => {
+    // When charts are visible, we need to re-render them
+    if (document.querySelector('.visualization-toggle .viz-btn.active').dataset.viz) {
+      const viz = document.querySelector('.visualization-toggle .viz-btn.active').dataset.viz;
+      if (viz === 'charts') {
+        renderCharts(filteredRepos.length ? filteredRepos : allRepos);
+      }
+    }
     applyFiltersAndSort();
   });
   
@@ -275,6 +507,9 @@ function setupEventListeners() {
       currentFilter = e.target.dataset.filter;
       // Reset search
       searchInput.value = '';
+      if (document.querySelector('.visualization-toggle .viz-btn.active').dataset.viz === 'charts') {
+        renderCharts(filteredRepos.length ? filteredRepos : allRepos);
+      }
       applyFiltersAndSort();
     }
   });
@@ -285,6 +520,9 @@ function setupEventListeners() {
       document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
       e.target.classList.add('active');
       currentSort = e.target.dataset.sort;
+      if (document.querySelector('.visualization-toggle .viz-btn.active').dataset.viz === 'charts') {
+        renderCharts(filteredRepos.length ? filteredRepos : allRepos);
+      }
       applyFiltersAndSort();
     }
   });
@@ -295,8 +533,18 @@ function setupEventListeners() {
       document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
       e.target.classList.add('active');
       currentView = e.target.dataset.view;
-      document.getElementById('repos').className = `repos-${currentView}`;
-      applyFiltersAndSort();
+      
+      // Hide charts/graph container
+      document.querySelector('.viz-container').classList.add('hidden');
+      document.querySelector('.repos-graph').classList.add('hidden');
+      
+      if (currentView === 'graph') {
+        renderGraph(allRepos);
+        document.querySelector('.repos-graph').classList.remove('hidden');
+      } else {
+        applyFiltersAndSort();
+        document.getElementById('repos').className = `repos-${currentView}`;
+      }
     }
   });
 }
