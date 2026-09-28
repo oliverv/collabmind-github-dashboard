@@ -10,18 +10,6 @@ let currentSort = 'updated';
 let currentView = 'grid';
 let charts = {};
 
-// Color palette for categories
-const categoryColors = {
-  'app': '#00D4FF',
-  'ai': '#8A2BE2',
-  'mcp': '#3CB371',
-  'worker': '#FF8C00',
-  'control': '#8A2BE2',
-  'infra': '#00BF7F',
-  'fork': '#FFD700',
-  'other': '#A6A6A6'
-};
-
 // Category detection based on repository naming patterns
 function getRepoCategory(repo) {
   const name = repo.name.toLowerCase();
@@ -57,7 +45,6 @@ async function loadRepos() {
     return data.repos || [];
   } catch (error) {
     console.error('Error loading repos.json:', error.message);
-    // Fallback to direct API
     return await fetchReposFromAPI();
   }
 }
@@ -103,7 +90,7 @@ function formatDate(dateString) {
 function renderRepos(repos) {
   const container = document.getElementById('repos');
   
-  if (!repos.length) {
+  if (!Array.isArray(repos) || !repos.length) {
     container.innerHTML = `
       <div class="empty-state">
         <h3>No repositories found</h3>
@@ -122,7 +109,6 @@ function renderRepoCard(repo) {
   const isFork = repo.fork;
   const label = repo.language || '—';
   
-  // Find upstream for forks
   let upstreamInfo = '';
   let upstreamLink = '';
   if (isFork && repo.parent) {
@@ -130,7 +116,6 @@ function renderRepoCard(repo) {
     upstreamLink = repo.parent.html_url;
   }
 
-  // Get user's fork URL
   const myForkLink = `https://github.com/${USERNAME}/${repo.name}`;
   const sourceLink = repo.html_url;
   const cloneUrl = repo.clone_url;
@@ -166,13 +151,15 @@ function renderRepoCard(repo) {
 function copyCloneUrl(url, name) {
   navigator.clipboard.writeText(url).then(() => {
     const btn = document.querySelector(`.clone-btn[onclick*="${name}"]`);
-    const originalText = btn.textContent;
-    btn.textContent = '✓ Copied';
-    btn.classList.add('copied');
-    setTimeout(() => {
-      btn.textContent = originalText;
-      btn.classList.remove('copied');
-    }, 2000);
+    if (btn) {
+      const originalText = btn.textContent;
+      btn.textContent = '✓ Copied';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = originalText;
+        btn.classList.remove('copied');
+      }, 2000);
+    }
   });
 }
 
@@ -187,11 +174,8 @@ function updateFilterButtons(repos) {
   const container = document.getElementById('category-filters');
   const categories = ['all', 'app', 'ai', 'mcp', 'worker', 'control', 'infra', 'fork', 'other'];
   
-  // Count by category
   const counts = {};
-  categories.forEach(cat => {
-    counts[cat] = 0;
-  });
+  categories.forEach(cat => { counts[cat] = 0; });
   
   repos.forEach(repo => {
     const cat = getRepoCategory(repo);
@@ -200,13 +184,9 @@ function updateFilterButtons(repos) {
 
   let html = '';
   categories.forEach(cat => {
-    const label = cat.toUpperCase();
     const count = counts[cat];
-    const active = cat === currentFilter ? ' active' : '';
-    
-    // Only show categories with repos
     if (count > 0 || cat === 'all') {
-      html += `<button class="filter-btn${active}" data-filter="${cat}">${label} ${count > 0 ? count : ''}</button>`;
+      html += `<button class="filter-btn ${currentFilter === cat ? 'active' : ''}" data-filter="${cat}">${cat.toUpperCase()}${count > 0 ? ' ' + count : ''}</button>`;
     }
   });
   
@@ -223,6 +203,16 @@ function getLanguageDistribution(repos) {
   return langs;
 }
 
+// Get category distribution
+function getCategoryDistribution(repos) {
+  const counts = {};
+  repos.forEach(repo => {
+    const cat = getRepoCategory(repo);
+    counts[cat] = (counts[cat] || 0) + 1;
+  });
+  return counts;
+}
+
 // Get star distribution
 function getStarDistribution(repos) {
   const distribution = { '<10': 0, '10-100': 0, '100-1000': 0, '1000+': 0 };
@@ -236,146 +226,140 @@ function getStarDistribution(repos) {
   return distribution;
 }
 
-// Create visualizations
-function createCharts(repos) {
-  const vizContainer = document.querySelector('.visualization-toggle');
-  if (!vizContainer) return;
-  
-  // Create visualization toggle
-  vizContainer.innerHTML = `
-    <button class="viz-btn active" data-viz="charts">CHARTS</button>
-    <button class="viz-btn" data-viz="graph">NETWORK</button>
-  `;
-  
-  // Render charts
-  renderCharts(repos);
-  
-  // Setup viz toggle
-  document.querySelector('.visualization-toggle').addEventListener('click', (e) => {
-    if (e.target.classList.contains('viz-btn')) {
-      document.querySelectorAll('.viz-btn').forEach(btn => btn.classList.remove('active'));
-      e.target.classList.add('active');
-      const viz = e.target.dataset.viz;
-      
-      document.querySelectorAll('.viz-container, .repos-graph').forEach(el => el.classList.add('hidden'));
-      if (viz === 'charts') {
-        document.querySelector('.viz-container').classList.remove('hidden');
-      } else {
-        document.querySelector('.repos-graph').classList.remove('hidden');
-      }
+// Render charts
+function renderCharts(repos) {
+  try {
+    // Language Distribution (Doughnut)
+    const langData = getLanguageDistribution(repos);
+    const langCtx = document.getElementById('language-chart');
+    if (langCtx) {
+      if (charts.language) charts.language.destroy();
+      charts.language = new Chart(langCtx.getContext('2d'), {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(langData),
+          datasets: [{
+            data: Object.values(langData),
+            backgroundColor: Object.keys(langData).map(() => '#00D4FF'),
+            borderColor: '#151A2A',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom' } }
+        }
+      });
     }
-  });
+
+    // Category Distribution (Bar)
+    const catData = getCategoryDistribution(repos);
+    const catCtx = document.getElementById('category-chart');
+    if (catCtx) {
+      if (charts.category) charts.category.destroy();
+      charts.category = new Chart(catCtx.getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: Object.keys(catData),
+          datasets: [{
+            label: 'Count',
+            data: Object.values(catData),
+            backgroundColor: Object.keys(catData).map(l => {
+              const cat = l.toLowerCase();
+              return {
+                'app': '#00D4FF', 'ai': '#8A2BE2', 'mcp': '#3CB371',
+                'worker': '#FF8C00', 'control': '#8A2BE2', 'infra': '#00BF7F',
+                'fork': '#FFD700', 'other': '#A6A6A6'
+              }[cat] || '#A6A6A6';
+            }),
+            borderColor: '#151A2A',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true, ticks: { color: '#7A829E' }, grid: { color: '#1E2640' } },
+            x: { ticks: { color: '#7A829E' }, grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    // Star Distribution (Bar)
+    const starData = getStarDistribution(repos);
+    const starCtx = document.getElementById('star-chart');
+    if (starCtx) {
+      if (charts.stars) charts.stars.destroy();
+      charts.stars = new Chart(starCtx.getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: ['<10', '10-100', '100-1k', '1k+'],
+          datasets: [{
+            label: 'Repos',
+            data: Object.values(starData),
+            backgroundColor: '#00D4FF',
+            borderColor: '#151A2A',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Chart error:', error);
+  }
 }
 
-// Render chart visualization
-function renderCharts(repos) {
-  // Language Distribution (Doughnut)
-  const langData = getLanguageDistribution(repos);
-  const langCtx = document.getElementById('language-chart').getContext('2d');
+// Render graph view - simplified network visualization
+function renderGraph(repos) {
+  const container = document.getElementById('repos');
   
-  if (charts.language) charts.language.destroy();
-  charts.language = new Chart(langCtx, {
-    type: 'doughnut',
-    data: {
-      labels: Object.keys(langData),
-      datasets: [{
-        data: Object.values(langData),
-        backgroundColor: Object.keys(langData).map(l => {
-          if (['Go', 'TypeScript', 'Shell', 'Python', 'JavaScript', 'Rust', 'JSON', 'YAML', 'Dockerfile'].includes(l)) {
-            return categoryColors.app;
-          } else if (['Python', 'JavaScript', 'TypeScript'].includes(l)) {
-            return categoryColors.ai;
-          } else if (l === 'Other' || !l) {
-            return categoryColors.other;
-          }
-          return '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
-        }),
-        borderColor: '#151A2A',
-        borderWidth: 2
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'bottom' },
-        title: { display: false }
-      }
-    }
-  });
+  const forks = repos.filter(r => r.fork && r.parent);
   
-  // Category Distribution (Bar)
-  const categoryCounts = {};
-  ['app', 'ai', 'mcp', 'worker', 'control', 'infra', 'fork', 'other'].forEach(cat => {
-    categoryCounts[cat.toUpperCase()] = repos.filter(r => getRepoCategory(r) === cat).length;
-  });
+  if (!forks.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <h3>No Fork Relationships</h3>
+        <p>No forked repositories with upstream parents found in this collection.</p>
+      </div>
+    `;
+    return;
+  }
   
-  const catCtx = document.getElementById('category-chart').getContext('2d');
-  
-  if (charts.category) charts.category.destroy();
-  charts.category = new Chart(catCtx, {
-    type: 'bar',
-    data: {
-      labels: Object.keys(categoryCounts),
-      datasets: [{
-        label: 'Count',
-        data: Object.values(categoryCounts),
-        backgroundColor: Object.keys(categoryCounts).map(cat => categoryColors[cat.toLowerCase()] || categoryColors.other),
-        borderColor: '#151A2A',
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        y: { 
-          beginAtZero: true,
-          ticks: { color: '#7A829E' },
-          grid: { color: '#1E2640' }
-        },
-        x: { 
-          ticks: { color: '#7A829E' },
-          grid: { display: false }
-        }
-      },
-      plugins: {
-        legend: { display: false }
-      }
-    }
-  });
-  
-  // Star Distribution (Bar)
-  const starData = getStarDistribution(repos);
-  const starCtx = document.getElementById('star-chart').getContext('2d');
-  
-  if (charts.stars) charts.stars.destroy();
-  charts.stars = new Chart(starCtx, {
-    type: 'bar',
-    data: {
-      labels: ['<10', '10-100', '100-1k', '1k+'],
-      datasets: [{
-        label: 'Repos',
-        data: Object.values(starData),
-        backgroundColor: '#00D4FF',
-        borderColor: '#151A2A',
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        y: { beginAtZero: true }
-      },
-      plugins: { legend: { display: false } }
-    }
-  });
+  container.innerHTML = `
+    <div class="repos-grid">
+      ${forks.map(f => `
+        <article class="repo-card">
+          <div class="repo-header">
+            <h3 class="repo-name">
+              <a href="${f.fork.html_url}" target="_blank" rel="noopener">${f.fork.name}</a>
+            </h3>
+            <span class="tag fork">FORK</span>
+          </div>
+          <div class="repo-upstream">
+            <span class="upstream-label">↳ </span>
+            <a href="${f.parent.html_url}" target="_blank" rel="noopener">${f.parent.name}</a>
+          </div>
+          <div class="repo-stats">
+            <span>⭐ ${f.fork.stargazers_count}</span>
+            <span>Updated ${formatDate(f.fork.updated_at)}</span>
+          </div>
+        </article>
+      `).join('')}
+    </div>
+  `;
 }
 
 // Apply filters and sorting
 function applyFiltersAndSort() {
-  let result = [...allRepos];
+  let result = Array.isArray(allRepos) ? [...allRepos] : [];
   
   // Apply category filter
   if (currentFilter !== 'all') {
@@ -415,70 +399,24 @@ function applyFiltersAndSort() {
   renderRepos(result);
 }
 
-// Render graph view - simplified network visualization
-function renderGraph(repos) {
-  const container = document.getElementById('repos');
-  
-  // Find forks with parents
-  const forks = repos.filter(r => r.fork && r.parent).map(r => ({
-    fork: r,
-    parent: r.parent
-  }));
-  
-  if (!forks.length) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <h3>No Fork Relationships</h3>
-        <p>No forked repositories with upstream parents found in this collection.</p>
-      </div>
-    `;
-    return;
-  }
-  
-  // Simple grid layout for fork relationships
-  container.innerHTML = `
-    <div class="repos-grid">
-      ${forks.map(f => `
-        <article class="repo-card">
-          <div class="repo-header">
-            <h3 class="repo-name">
-              <a href="${f.fork.html_url}" target="_blank" rel="noopener">${f.fork.name}</a>
-            </h3>
-            <span class="tag fork">FORK</span>
-          </div>
-          <div class="repo-upstream">
-            <span class="upstream-label">↳ </span>
-            <a href="${f.parent.html_url}" target="_blank" rel="noopener">${f.parent.full_name}</a>
-          </div>
-          <div class="repo-stats">
-            <span>⭐ ${f.fork.stargazers_count}</span>
-            <span>Updated ${formatDate(f.fork.updated_at)}</span>
-          </div>
-        </article>
-      `).join('')}
-    </div>
-  `;
-}
-
 // Initialize the application
 async function init() {
-  // Load repos
   const repos = await loadRepos();
-  allRepos = repos;
+  allRepos = repos || [];
+  filteredRepos = allRepos;
   
   // Update stats and categories
-  updateStats(repos);
-  updateFilterButtons(repos);
+  updateStats(allRepos);
+  updateFilterButtons(allRepos);
   
-  // Create charts
-  createCharts(repos);
+  // Render charts first
+  renderCharts(allRepos);
   
-  // Render initially (based on default view)
-  if (currentView === 'graph') {
-    renderGraph(repos);
-  } else {
-    applyFiltersAndSort();
-  }
+  // Show visualizations section
+  document.querySelector('.visualizations-section').style.display = 'block';
+  
+  // Render initially
+  applyFiltersAndSort();
   
   // Setup event listeners
   setupEventListeners();
@@ -486,57 +424,40 @@ async function init() {
 
 // Setup event listeners
 function setupEventListeners() {
-  // Search input
   const searchInput = document.getElementById('search');
   searchInput.addEventListener('input', () => {
-    // When charts are visible, we need to re-render them
-    if (document.querySelector('.visualization-toggle .viz-btn.active').dataset.viz) {
-      const viz = document.querySelector('.visualization-toggle .viz-btn.active').dataset.viz;
-      if (viz === 'charts') {
-        renderCharts(filteredRepos.length ? filteredRepos : allRepos);
-      }
-    }
+    renderCharts(filteredRepos);
     applyFiltersAndSort();
   });
   
-  // Category filters
   document.getElementById('category-filters').addEventListener('click', (e) => {
     if (e.target.classList.contains('filter-btn')) {
       document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
       e.target.classList.add('active');
       currentFilter = e.target.dataset.filter;
-      // Reset search
       searchInput.value = '';
-      if (document.querySelector('.visualization-toggle .viz-btn.active').dataset.viz === 'charts') {
-        renderCharts(filteredRepos.length ? filteredRepos : allRepos);
-      }
+      renderCharts(allRepos);
       applyFiltersAndSort();
     }
   });
   
-  // Sort buttons
   document.getElementById('sort-controls').addEventListener('click', (e) => {
     if (e.target.classList.contains('sort-btn')) {
       document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
       e.target.classList.add('active');
       currentSort = e.target.dataset.sort;
-      if (document.querySelector('.visualization-toggle .viz-btn.active').dataset.viz === 'charts') {
-        renderCharts(filteredRepos.length ? filteredRepos : allRepos);
-      }
+      renderCharts(filteredRepos);
       applyFiltersAndSort();
     }
   });
   
-  // View buttons
   document.getElementById('view-controls').addEventListener('click', (e) => {
     if (e.target.classList.contains('view-btn')) {
       document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
       e.target.classList.add('active');
       currentView = e.target.dataset.view;
       
-      // Hide charts/graph container
-      document.querySelector('.viz-container').classList.add('hidden');
-      document.querySelector('.repos-graph').classList.add('hidden');
+      document.querySelectorAll('.viz-container, .repos-graph').forEach(el => el.classList.add('hidden'));
       
       if (currentView === 'graph') {
         renderGraph(allRepos);
@@ -544,6 +465,7 @@ function setupEventListeners() {
       } else {
         applyFiltersAndSort();
         document.getElementById('repos').className = `repos-${currentView}`;
+        document.querySelector('.viz-container').classList.remove('hidden');
       }
     }
   });
