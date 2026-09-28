@@ -13,17 +13,18 @@ let charts = {};
 // Category detection based on repository naming patterns
 function getRepoCategory(repo) {
   const name = repo.name.toLowerCase();
+  const fullName = repo.full_name ? repo.full_name.toLowerCase() : name;
   const patterns = {
-    'app': ['collabmind-apps-', '1panel', 'auto-space', 'copilot'],
-    'ai': ['collabmind-ai-', 'open-webui', 'ollama', 'lm-studio', 'text-generation-webui', 'oobabooga', 'anybolt'],
-    'mcp': ['collabmind-mcp-', 'mcp-server', 'model-context-protocol'],
-    'worker': ['collabmind-workers-', 'worker-', 'agent-'],
-    'control': ['collabmind-control-', 'control-plane', 'orchestrator'],
-    'infra': ['collabmind-infra-', 'kubernetes', 'docker-', 'terraform', 'ansible', 'k3s']
+    'app': ['collabmind-apps-', 'oliverv/collabmind-apps-', 'collabmind-1panel', '1panel', 'auto-space', 'copilot'],
+    'ai': ['collabmind-ai-', 'oliverv/collabmind-ai-', 'open-webui', 'ollama', 'lm-studio', 'text-generation-webui', 'oobabooga', 'anybolt', 'openwebui'],
+    'mcp': ['collabmind-mcp-', 'oliverv/collabmind-mcp-', 'mcp-server', 'model-context-protocol'],
+    'worker': ['collabmind-workers-', 'oliverv/collabmind-workers-', 'worker-', 'agent-'],
+    'control': ['collabmind-control-', 'oliverv/collabmind-control-', 'control-plane', 'orchestrator'],
+    'infra': ['collabmind-infra-', 'oliverv/collabmind-infra-', 'kubernetes', 'docker-', 'terraform', 'ansible', 'k3s', 'collabmind-kubernetes']
   };
 
   for (const [category, keywords] of Object.entries(patterns)) {
-    if (keywords.some(kw => name.includes(kw))) {
+    if (keywords.some(kw => name.includes(kw) || fullName.includes(kw))) {
       return category;
     }
   }
